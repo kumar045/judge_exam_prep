@@ -316,6 +316,6 @@ st.markdown("""
 <div style='text-align: center'>
     <p>⚖️ Specialized assistance for Indian Judiciary Examination preparation</p>
     <p>📚 Focus on exam-relevant analysis and practical application</p>
-    <p>📚 Love from Shivam</p>
+    <p>♥ Love from Shivam</p>
 </div>
 """, unsafe_allow_html=True)
