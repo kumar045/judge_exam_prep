@@ -2,12 +2,11 @@ import streamlit as st
 import google.generativeai as genai
 import PIL.Image
 from io import BytesIO
+from datetime import datetime
 
-# Configure page settings
-st.set_page_config(page_title="Smart Question Solver", layout="wide")
-
-# Initialize Gemini models
-def initialize_gemini(api_key):
+# Initialize Gemini models using secrets
+def initialize_gemini():
+    api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
     return {
         'vision': genai.GenerativeModel('gemini-pro-vision'),
@@ -15,15 +14,16 @@ def initialize_gemini(api_key):
     }
 
 def get_gemini_response(models, input_data, prompt):
-    if isinstance(input_data, (list, tuple)):
-        # For combined image and text
-        return models['vision'].generate_content([prompt] + list(input_data)).text
-    elif isinstance(input_data, PIL.Image.Image):
-        # For image only
-        return models['vision'].generate_content([prompt, input_data]).text
-    else:
-        # For text only
-        return models['text'].generate_content(f"{prompt}\n\nQuestion: {input_data}").text
+    try:
+        if isinstance(input_data, (list, tuple)):
+            return models['vision'].generate_content([prompt] + list(input_data)).text
+        elif isinstance(input_data, PIL.Image.Image):
+            return models['vision'].generate_content([prompt, input_data]).text
+        else:
+            return models['text'].generate_content(f"{prompt}\n\nQuestion: {input_data}").text
+    except Exception as e:
+        st.error(f"Error generating response: {str(e)}")
+        return None
 
 def image_to_bytes(upload):
     if upload is not None:
@@ -32,30 +32,70 @@ def image_to_bytes(upload):
         return img
     return None
 
+# Configure page settings
+st.set_page_config(
+    page_title="Smart Question Solver",
+    page_icon="🎓",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Custom CSS
+st.markdown("""
+<style>
+    .stAlert {
+        margin-top: 1rem;
+    }
+    .main {
+        padding: 2rem;
+    }
+    .stButton>button {
+        width: 100%;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Initialize session state for history
+if 'question_history' not in st.session_state:
+    st.session_state.question_history = []
+
 # Streamlit UI
 st.title("🎓 Smart Question Solver")
 st.write("Input your question as text, image, or both!")
 
-# Sidebar for API key and instructions
+# Sidebar with instructions
 with st.sidebar:
-    st.header("Configuration")
-    api_key = st.text_input("Enter your Google API Key", type="password")
-    
+    st.header("How to Use")
     st.markdown("""
-    ### How to use:
-    1. Enter your Google API key
-    2. Choose input method(s):
-       - Type your question
-       - Upload image
-       - Or both!
-    3. Select the type of help needed
-    4. Get detailed explanations
+    ### Input Options:
+    1. **Text Question**
+       - Type your question directly
+       - Best for theoretical questions
     
-    ### Tips:
-    - For math problems, clear images work best
-    - For conceptual questions, try using text
-    - Combine both for complex problems
+    2. **Image Upload**
+       - Upload clear images of problems
+       - Supports JPG, JPEG, PNG
+    
+    3. **Combined Input**
+       - Use both text and image
+       - Great for detailed explanations
+    
+    ### Tips for Best Results:
+    - 📸 Ensure images are clear and well-lit
+    - 📝 Be specific in text descriptions
+    - 🔍 Choose appropriate help type
     """)
+    
+    # View History Toggle
+    if st.toggle("View Question History"):
+        st.markdown("### Recent Questions")
+        for idx, item in enumerate(reversed(st.session_state.question_history[-5:])):
+            with st.expander(f"Question {len(st.session_state.question_history)-idx}"):
+                if item['text']:
+                    st.write("Text:", item['text'])
+                if item['image'] is not None:
+                    st.image(item['image'], width=200)
+                st.write("Response:", item['response'][:200] + "...")
 
 # Main content
 col1, col2 = st.columns([1, 1])
@@ -77,10 +117,6 @@ with col1:
     if uploaded_file:
         st.image(uploaded_file, caption="Uploaded Question", use_column_width=True)
     
-    # Input validation
-    if not text_question and not uploaded_file:
-        st.warning("Please provide either text question or image or both.")
-    
     help_type = st.selectbox(
         "What kind of help do you need?",
         ["Simplify and explain the question",
@@ -91,9 +127,9 @@ with col1:
     )
 
 with col2:
-    if (text_question or uploaded_file) and api_key:
+    if text_question or uploaded_file:
         try:
-            models = initialize_gemini(api_key)
+            models = initialize_gemini()
             
             # Prepare input data
             input_data = []
@@ -103,11 +139,9 @@ with col2:
             if text_question:
                 input_data.append(text_question)
             
-            # Use single input if only one type provided
             if len(input_data) == 1:
                 input_data = input_data[0]
             
-            # Different prompts based on help type
             prompts = {
                 "Simplify and explain the question": """
                 Analyze this question and:
@@ -152,39 +186,52 @@ with col2:
                 """
             }
 
-            if st.button("Get Help"):
+            if st.button("Get Help", type="primary"):
                 with st.spinner("Analyzing your question..."):
                     response = get_gemini_response(models, input_data, prompts[help_type])
                     
-                    st.success("Analysis complete!")
-                    st.markdown("### Response:")
-                    st.markdown(response)
-                    
-                    # Additional options
-                    col_a, col_b = st.columns(2)
-                    with col_a:
-                        if st.button("Need more examples?"):
-                            followup = get_gemini_response(
-                                models,
-                                input_data,
-                                "Please provide additional similar examples and detailed explanations."
-                            )
-                            st.markdown("### Additional Examples:")
-                            st.markdown(followup)
-                    
-                    with col_b:
-                        if st.button("Simplify further?"):
-                            simplify = get_gemini_response(
-                                models,
-                                input_data,
-                                "Please explain this in even simpler terms, as if explaining to a beginner."
-                            )
-                            st.markdown("### Simplified Explanation:")
-                            st.markdown(simplify)
+                    if response:
+                        st.success("Analysis complete!")
+                        
+                        # Save to history
+                        st.session_state.question_history.append({
+                            'text': text_question,
+                            'image': uploaded_file,
+                            'response': response,
+                            'timestamp': datetime.now()
+                        })
+                        
+                        # Display response
+                        st.markdown("### Response:")
+                        st.markdown(response)
+                        
+                        # Additional help options
+                        col_a, col_b = st.columns(2)
+                        with col_a:
+                            if st.button("Need more examples?"):
+                                followup = get_gemini_response(
+                                    models,
+                                    input_data,
+                                    "Please provide additional similar examples and detailed explanations."
+                                )
+                                if followup:
+                                    st.markdown("### Additional Examples:")
+                                    st.markdown(followup)
+                        
+                        with col_b:
+                            if st.button("Simplify further?"):
+                                simplify = get_gemini_response(
+                                    models,
+                                    input_data,
+                                    "Please explain this in even simpler terms, as if explaining to a beginner."
+                                )
+                                if simplify:
+                                    st.markdown("### Simplified Explanation:")
+                                    st.markdown(simplify)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
-            st.info("Please make sure you've entered a valid API key and provided clear input.")
+            st.info("Please make sure your input is clear and try again.")
 
 # Footer
 st.markdown("---")
@@ -194,16 +241,3 @@ st.markdown("""
     <p>💡 For best results, provide clear images and detailed text descriptions</p>
 </div>
 """, unsafe_allow_html=True)
-
-# Session state management for history
-if 'question_history' not in st.session_state:
-    st.session_state.question_history = []
-
-# Save question and response to history
-def save_to_history(question_text, question_image, response):
-    st.session_state.question_history.append({
-        'text': question_text,
-        'image': question_image,
-        'response': response,
-        'timestamp': datetime.now()
-    })
