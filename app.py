@@ -34,8 +34,8 @@ def image_to_bytes(upload):
 
 # Configure page settings
 st.set_page_config(
-    page_title="Smart Question Solver",
-    page_icon="🎓",
+    page_title="Judiciary Exam Preparation Assistant",
+    page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -43,87 +43,125 @@ st.set_page_config(
 # Custom CSS
 st.markdown("""
 <style>
-    .stAlert {
-        margin-top: 1rem;
-    }
-    .main {
-        padding: 2rem;
-    }
-    .stButton>button {
-        width: 100%;
+    .stAlert {margin-top: 1rem;}
+    .main {padding: 2rem;}
+    .stButton>button {width: 100%;}
+    .legal-category {
+        padding: 10px;
+        background-color: #f0f2f6;
+        border-radius: 5px;
+        margin: 5px 0;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state for history
+# Initialize session state
 if 'question_history' not in st.session_state:
     st.session_state.question_history = []
 
 # Streamlit UI
-st.title("🎓 Smart Question Solver")
-st.write("Input your question as text, image, or both!")
+st.title("⚖️ Judiciary Exam Preparation Assistant")
+st.write("Specialized help for Indian Judiciary Examination preparation")
 
-# Sidebar with instructions
+# Sidebar with exam-specific information
 with st.sidebar:
-    st.header("How to Use")
+    st.header("Exam Preparation Guide")
     st.markdown("""
-    ### Input Options:
-    1. **Text Question**
-       - Type your question directly
-       - Best for theoretical questions
+    ### Key Areas:
+    1. **Constitutional Law**
+       - Fundamental Rights
+       - Directive Principles
+       - Union & States
     
-    2. **Image Upload**
-       - Upload clear images of problems
-       - Supports JPG, JPEG, PNG
+    2. **Criminal Law**
+       - IPC
+       - CrPC
+       - Evidence Act
     
-    3. **Combined Input**
-       - Use both text and image
-       - Great for detailed explanations
+    3. **Civil Law**
+       - CPC
+       - Contract Act
+       - Property Law
     
-    ### Tips for Best Results:
-    - 📸 Ensure images are clear and well-lit
-    - 📝 Be specific in text descriptions
-    - 🔍 Choose appropriate help type
+    4. **Important Acts**
+       - Special & Local Laws
+       - Latest Amendments
+       - Landmark Cases
+    
+    ### Tips:
+    - 📚 Focus on recent judgments
+    - ⚖️ Practice case analysis
+    - 📝 Attempt mock tests regularly
     """)
     
-    # View History Toggle
-    if st.toggle("View Question History"):
+    # View History
+    if st.toggle("View Previous Questions"):
         st.markdown("### Recent Questions")
         for idx, item in enumerate(reversed(st.session_state.question_history[-5:])):
             with st.expander(f"Question {len(st.session_state.question_history)-idx}"):
                 if item['text']:
-                    st.write("Text:", item['text'])
+                    st.write("Question:", item['text'])
                 if item['image'] is not None:
                     st.image(item['image'], width=200)
-                st.write("Response:", item['response'][:200] + "...")
+                st.write("Analysis:", item['response'][:200] + "...")
 
 # Main content
 col1, col2 = st.columns([1, 1])
 
 with col1:
+    # Subject selection
+    subject_category = st.selectbox(
+        "Select Subject Category",
+        ["Constitutional Law", "Criminal Law", "Civil Law", "Special Laws", 
+         "Jurisprudence", "Legal Maxims", "Landmark Cases"]
+    )
+    
+    # Question type selection based on subject
+    question_types = {
+        "Constitutional Law": ["Fundamental Rights", "State Policy", "Union-State Relations", 
+                             "Constitutional Amendments", "Emergency Provisions"],
+        "Criminal Law": ["IPC Sections", "Criminal Procedure", "Evidence Law", 
+                        "Bail Provisions", "Criminal Trials"],
+        "Civil Law": ["CPC Procedures", "Contract Law", "Property Law", 
+                     "Family Law", "Civil Remedies"],
+        "Special Laws": ["Consumer Protection", "Environmental Law", "Cyber Laws", 
+                        "Banking Laws", "Intellectual Property"],
+        "Jurisprudence": ["Legal Concepts", "Schools of Jurisprudence", 
+                         "Legal Terminology", "Legal Principles"],
+        "Legal Maxims": ["Latin Maxims", "English Law Maxims", "Indian Legal Principles"],
+        "Landmark Cases": ["Supreme Court Cases", "High Court Cases", "Constitutional Bench",
+                          "Recent Judgments"]
+    }
+    
+    sub_category = st.selectbox(
+        "Select Specific Topic",
+        question_types[subject_category]
+    )
+    
     # Text input
     text_question = st.text_area(
-        "Type your question here (optional)", 
+        "Enter your legal question or case scenario",
         height=100,
-        placeholder="Enter your question text here..."
+        placeholder="Type your question or paste case excerpt here..."
     )
     
     # Image upload
     uploaded_file = st.file_uploader(
-        "Upload question image (optional)", 
+        "Upload question image or case document",
         type=['jpg', 'jpeg', 'png']
     )
     
     if uploaded_file:
-        st.image(uploaded_file, caption="Uploaded Question", use_column_width=True)
+        st.image(uploaded_file, caption="Uploaded Document", use_column_width=True)
     
-    help_type = st.selectbox(
-        "What kind of help do you need?",
-        ["Simplify and explain the question",
-         "Provide step-by-step solution",
-         "Give hints without full solution",
-         "Explain core concepts involved",
-         "Practice problems and examples"]
+    analysis_type = st.selectbox(
+        "Select Analysis Type",
+        ["Case Law Analysis",
+         "Legal Principle Explanation",
+         "Previous Year Question Analysis",
+         "Mock Test Answer Evaluation",
+         "Conceptual Clarity",
+         "Comparative Analysis"]
     )
 
 with col2:
@@ -131,7 +169,6 @@ with col2:
         try:
             models = initialize_gemini()
             
-            # Prepare input data
             input_data = []
             if uploaded_file:
                 image = image_to_bytes(uploaded_file)
@@ -142,53 +179,78 @@ with col2:
             if len(input_data) == 1:
                 input_data = input_data[0]
             
+            # Specialized legal prompts
             prompts = {
-                "Simplify and explain the question": """
-                Analyze this question and:
-                1. Simplify it into easier language
-                2. Identify the key points to focus on
-                3. Explain what the question is really asking
-                4. Highlight any important terms or concepts
+                "Case Law Analysis": f"""
+                Analyze this legal question/case for Indian Judiciary Exam preparation:
+                1. Identify key legal principles and precedents
+                2. Break down relevant statutory provisions
+                3. Cite important Supreme Court judgments
+                4. Explain ratio decidendi
+                5. Discuss practical application
+                
+                Focus on {subject_category} - {sub_category}
                 """,
                 
-                "Provide step-by-step solution": """
-                Solve this question by:
-                1. Breaking it down into simple steps
-                2. Explaining each step clearly
-                3. Showing all work and calculations
-                4. Providing the final answer with explanation
-                5. Adding tips for similar problems
+                "Legal Principle Explanation": f"""
+                Explain the legal principles for Indian Judiciary Exam:
+                1. Define core legal concepts
+                2. Provide relevant sections and articles
+                3. List important case laws
+                4. Give exam-oriented points
+                5. Add comparative analysis if applicable
+                
+                Specific to {subject_category} - {sub_category}
                 """,
                 
-                "Give hints without full solution": """
-                Provide helpful hints by:
-                1. Identifying the key concepts needed
-                2. Suggesting an approach without giving the answer
-                3. Pointing out important things to consider
-                4. Offering guiding questions
+                "Previous Year Question Analysis": f"""
+                Analyze this previous year question:
+                1. Break down question structure
+                2. Identify key legal points to cover
+                3. Provide framework for answer
+                4. Mention relevant cases and sections
+                5. Give exam strategy tips
+                
+                For {subject_category} - {sub_category}
                 """,
                 
-                "Explain core concepts involved": """
-                Explain the core concepts by:
-                1. Identifying the main topics involved
-                2. Explaining each concept in simple terms
-                3. Providing real-world examples
-                4. Connecting these concepts to the question
-                5. Suggesting related topics to explore
+                "Mock Test Answer Evaluation": f"""
+                Evaluate this mock test answer:
+                1. Assess legal reasoning
+                2. Check citation of cases
+                3. Evaluate structure and presentation
+                4. Suggest improvements
+                5. Provide model answer framework
+                
+                Related to {subject_category} - {sub_category}
                 """,
                 
-                "Practice problems and examples": """
-                Help with practice by:
-                1. Creating 2-3 similar practice problems
-                2. Providing partially worked examples
-                3. Including problems of varying difficulty
-                4. Explaining how to approach each type
+                "Conceptual Clarity": f"""
+                Explain this legal concept:
+                1. Define terms and principles
+                2. Provide statutory framework
+                3. List relevant case laws
+                4. Give practical examples
+                5. Add exam-specific tips
+                
+                In context of {subject_category} - {sub_category}
+                """,
+                
+                "Comparative Analysis": f"""
+                Provide comparative analysis:
+                1. Compare different legal provisions
+                2. Contrast judicial interpretations
+                3. Analyze conflicting judgments
+                4. Discuss evolving jurisprudence
+                5. Highlight exam-relevant points
+                
+                For {subject_category} - {sub_category}
                 """
             }
 
-            if st.button("Get Help", type="primary"):
-                with st.spinner("Analyzing your question..."):
-                    response = get_gemini_response(models, input_data, prompts[help_type])
+            if st.button("Analyze", type="primary"):
+                with st.spinner("Analyzing legal question..."):
+                    response = get_gemini_response(models, input_data, prompts[analysis_type])
                     
                     if response:
                         st.success("Analysis complete!")
@@ -202,42 +264,44 @@ with col2:
                         })
                         
                         # Display response
-                        st.markdown("### Response:")
+                        st.markdown("### Legal Analysis:")
                         st.markdown(response)
                         
-                        # Additional help options
+                        # Additional options
                         col_a, col_b = st.columns(2)
                         with col_a:
-                            if st.button("Need more examples?"):
+                            if st.button("Related Cases"):
                                 followup = get_gemini_response(
                                     models,
                                     input_data,
-                                    "Please provide additional similar examples and detailed explanations."
+                                    f"Please provide related landmark cases and recent judgments relevant to this topic in {subject_category} - {sub_category}"
                                 )
                                 if followup:
-                                    st.markdown("### Additional Examples:")
+                                    st.markdown("### Related Cases:")
                                     st.markdown(followup)
                         
                         with col_b:
-                            if st.button("Simplify further?"):
-                                simplify = get_gemini_response(
+                            if st.button("Exam Tips"):
+                                tips = get_gemini_response(
                                     models,
                                     input_data,
-                                    "Please explain this in even simpler terms, as if explaining to a beginner."
+                                    f"Provide specific exam strategy and answer writing tips for this type of question in {subject_category} - {sub_category}"
                                 )
-                                if simplify:
-                                    st.markdown("### Simplified Explanation:")
-                                    st.markdown(simplify)
+                                if tips:
+                                    st.markdown("### Exam Strategy Tips:")
+                                    st.markdown(tips)
 
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
-            st.info("Please make sure your input is clear and try again.")
+            st.info("Please ensure your input is clear and try again.")
 
 # Footer
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center'>
-    <p>📚 Get help with any academic question - text or image based!</p>
-    <p>💡 For best results, provide clear images and detailed text descriptions</p>
+    <p>⚖️ Specialized assistance for Indian Judiciary Examination preparation</p>
+    <p>📚 Focus on exam-relevant analysis and practical application</p>
+    <p>📚 Love from Shivam</p>
+    
 </div>
 """, unsafe_allow_html=True)
