@@ -109,15 +109,17 @@ with st.sidebar:
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    # Subject selection
+    # Subject selection with General option
     subject_category = st.selectbox(
         "Select Subject Category",
-        ["Constitutional Law", "Criminal Law", "Civil Law", "Special Laws", 
+        ["General Query", "Constitutional Law", "Criminal Law", "Civil Law", "Special Laws", 
          "Jurisprudence", "Legal Maxims", "Landmark Cases"]
     )
     
     # Question type selection based on subject
     question_types = {
+        "General Query": ["General Legal Question", "Current Legal Affairs", "Legal News Analysis",
+                         "Career Guidance", "Study Strategy", "Any Other Query"],
         "Constitutional Law": ["Fundamental Rights", "State Policy", "Union-State Relations", 
                              "Constitutional Amendments", "Emergency Provisions"],
         "Criminal Law": ["IPC Sections", "Criminal Procedure", "Evidence Law", 
@@ -154,9 +156,11 @@ with col1:
     if uploaded_file:
         st.image(uploaded_file, caption="Uploaded Document", use_column_width=True)
     
+    # Analysis type with General option
     analysis_type = st.selectbox(
         "Select Analysis Type",
-        ["Case Law Analysis",
+        ["General Analysis",
+         "Case Law Analysis",
          "Legal Principle Explanation",
          "Previous Year Question Analysis",
          "Mock Test Answer Evaluation",
@@ -179,8 +183,19 @@ with col2:
             if len(input_data) == 1:
                 input_data = input_data[0]
             
-            # Specialized legal prompts
+            # Specialized legal prompts with general option
             prompts = {
+                "General Analysis": f"""
+                Provide a comprehensive analysis of this query:
+                1. Understand the main question/issue
+                2. Provide relevant legal information
+                3. Cite applicable laws and cases if relevant
+                4. Give practical insights
+                5. Suggest further reading if needed
+                
+                Context: {subject_category} - {sub_category}
+                """,
+                
                 "Case Law Analysis": f"""
                 Analyze this legal question/case for Indian Judiciary Exam preparation:
                 1. Identify key legal principles and precedents
@@ -302,6 +317,5 @@ st.markdown("""
     <p>⚖️ Specialized assistance for Indian Judiciary Examination preparation</p>
     <p>📚 Focus on exam-relevant analysis and practical application</p>
     <p>📚 Love from Shivam</p>
-    
 </div>
 """, unsafe_allow_html=True)
