@@ -9,8 +9,8 @@ def initialize_gemini():
     api_key = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=api_key)
     return {
-        'vision': genai.GenerativeModel('gemini-pro-vision'),
-        'text': genai.GenerativeModel('gemini-pro')
+        'vision': genai.GenerativeModel('gemini-1.5-pro-002'),
+        'text': genai.GenerativeModel('gemini-1.5-pro-002')
     }
 
 def get_gemini_response(models, input_data, prompt):
