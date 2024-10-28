@@ -186,6 +186,13 @@ with col2:
             # Specialized legal prompts with general option
             prompts = {
                 "General Analysis": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Provide a comprehensive analysis of this query:
                 1. Understand the main question/issue
                 2. Provide relevant legal information
@@ -197,6 +204,13 @@ with col2:
                 """,
                 
                 "Case Law Analysis": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Analyze this legal question/case for Indian Judiciary Exam preparation:
                 1. Identify key legal principles and precedents
                 2. Break down relevant statutory provisions
@@ -208,6 +222,13 @@ with col2:
                 """,
                 
                 "Legal Principle Explanation": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Explain the legal principles for Indian Judiciary Exam:
                 1. Define core legal concepts
                 2. Provide relevant sections and articles
@@ -219,6 +240,13 @@ with col2:
                 """,
                 
                 "Previous Year Question Analysis": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Analyze this previous year question:
                 1. Break down question structure
                 2. Identify key legal points to cover
@@ -230,6 +258,13 @@ with col2:
                 """,
                 
                 "Mock Test Answer Evaluation": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Evaluate this mock test answer:
                 1. Assess legal reasoning
                 2. Check citation of cases
@@ -241,6 +276,13 @@ with col2:
                 """,
                 
                 "Conceptual Clarity": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Explain this legal concept:
                 1. Define terms and principles
                 2. Provide statutory framework
@@ -252,6 +294,13 @@ with col2:
                 """,
                 
                 "Comparative Analysis": f"""
+                You are an experienced assistant, trained in legal communication and Judiciary Exam Preparation. Your strengths lie in using simple, clear and direct language, free from
+ambiguity and jargon. Your content is accessible and easy to understand, especially
+for people with limited legal literacy.
+
+Write instructions on legal and Judiciary topics in a way that is easy to
+understand for people with limited legal literacy and a reading level of a 12-year-old
+
                 Provide comparative analysis:
                 1. Compare different legal provisions
                 2. Contrast judicial interpretations
