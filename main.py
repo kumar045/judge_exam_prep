@@ -5,7 +5,7 @@ from gradio_client import Client, file
 hf_token = "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"
 
 # Initialize Gradio clients with the Hugging Face token
-sd_client = Client("stabilityai/stable-diffusion-3-5-large", hf_token=hf_token)
+sd_client = Client("stabilityai/stable-diffusion-3.5-large", hf_token=hf_token)
 vto_client = Client("AI-Platform/Virtual-Try-On", hf_token=hf_token)
 
 # Streamlit app
