@@ -11,7 +11,7 @@ vto_client = Client("AI-Platform/Virtual-Try-On", hf_token=hf_token)
 # Streamlit app
 st.title("Image Generation and Virtual Try-On")
 
-# Stable Diffusion section
+# Section for Stable Diffusion
 st.header("Stable Diffusion")
 prompt = st.text_input("Enter your prompt:", "Hello!!")
 negative_prompt = st.text_input("Enter negative prompt:", "Hello!!")
@@ -23,23 +23,20 @@ num_inference_steps = st.number_input("Inference Steps:", min_value=1, value=40)
 
 if st.button("Generate Image"):
     with st.spinner("Generating image..."):
-        try:
-            result = sd_client.predict(
-                prompt=prompt,
-                negative_prompt=negative_prompt,
-                seed=seed,
-                randomize_seed=True,
-                width=width,
-                height=height,
-                guidance_scale=guidance_scale,
-                num_inference_steps=num_inference_steps,
-                api_name="/infer"
-            )
-            st.image(result, caption="Generated Image", use_column_width=True)
-        except Exception as e:
-            st.error(f"Error: {str(e)}")
+        result = sd_client.predict(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            seed=seed,
+            randomize_seed=True,
+            width=width,
+            height=height,
+            guidance_scale=guidance_scale,
+            num_inference_steps=num_inference_steps,
+            api_name="/infer"
+        )
+    st.image(result, caption="Generated Image", use_column_width=True)
 
-# Virtual Try-On section
+# Section for Virtual Try-On
 st.header("Virtual Try-On")
 garment_des = st.text_input("Garment Description:", "Hello!!")
 is_checked = st.checkbox("Use check for fitting?", value=True)
@@ -54,23 +51,21 @@ garment_img = st.file_uploader("Upload Garment Image", type=["png", "jpg"])
 if st.button("Try On"):
     if background and garment_img:
         with st.spinner("Processing Virtual Try-On..."):
-            try:
-                result_vto = vto_client.predict(
-                    dict={
-                        "background": file(background),
-                        "layers": [],
-                        "composite": None
-                    },
-                    garm_img=file(garment_img),
-                    garment_des=garment_des,
-                    is_checked=is_checked,
-                    is_checked_crop=is_checked_crop,
-                    denoise_steps=denoise_steps,
-                    seed=seed_vto,
-                    api_name="/tryon"
-                )
-                st.image(result_vto, caption="Virtual Try-On Result", use_column_width=True)
-            except Exception as e:
-                st.error(f"Error: {str(e)}")
+            result_vto = vto_client.predict(
+                dict={
+                    "background": file(background),
+                    "layers": [],
+                    "composite": None
+                },
+                garm_img=file(garment_img),
+                garment_des=garment_des,
+                is_checked=is_checked,
+                is_checked_crop=is_checked_crop,
+                denoise_steps=denoise_steps,
+                seed=seed_vto,
+                api_name="/tryon"
+            )
+        st.image(result_vto, caption="Virtual Try-On Result", use_column_width=True)
     else:
         st.error("Please upload both background and garment images.")
+
